@@ -382,6 +382,7 @@ The output are described by block below.
 | `-r`, `--resize`               | [global]<br>resize                             | How to downscale SEGA 192x64 or other high-resolution games to smaller displays. Can have three values:<ul>  <li>`stretch` - Just fill the available space and ignore the aspect ratio</li>  <li>`fill` - Fill it up so the whole DMD is filled while keeping aspect ratio intact. Pixels will be cropped off.</li>  <li>`fit` - Scale it so the whole image fits on the DMD while keeping aspect ratio intact. There will be white space (uh, more like black space).</li> |
 | `--flip-x`                     | [global]<br>fliphorizontally                   | Flips the image horizontally (left/right)                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `--flip-y`                     | [global]<br>flipvertically                     | Flips the image vertically (top/down)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `--rotate`                     | [global]<br>rotate<br>rol<br>ror               | Rotates the image before resizing. Command line values: `none`, `cw`, `ccw`, `rotate180`. INI also supports `rol = true` and `ror = true` aliases.                                                                                                                                                                                                                                                                                                                          |
 | `--colorize`                   | [global]<br>colorize                           | Enable or disable frame-by-frame colorization (inactive in VPX bundle)                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `--plugin`                     | [global]<br>plugin{n}.path[64]                 | Enable a third party plugin. See [Plugin Configuration](#plugin-configuration)                                                                                                                                                                                                                                                                                                                                                                                              |
 | `--plugin-passthrough`         | [global]<br>plugin{n}.passthrough              | Enable the plugin to always receive frames. See [Plugin Configuration](#plugin-configuration)                                                                                                                                                                                                                                                                                                                                                                               |
@@ -448,6 +449,7 @@ The following parameters are valid for all of dmdext's commands:
 |------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
 | `--use-ini`            | Path to `DmdDevice.ini` to use instead of command line options. If no path is provided, the `DMDDEVICE_CONFIG` environment variable is used as fallback. If just `DmdDevice.ini` is provided, dmdext will look for it in the current working directory. | *none*  |
 | `-c, --color`          | Sets the color of a grayscale source that is rendered on an RGB destination.                                                                                                                                                                            | ff3000  |
+| `--rotate`             | Rotates the image before resizing. One of: `none`, `cw`, `ccw`, `rotate180`.                                                                                                                                                                           | none    |
 | `-q, --quit-when-done` | Exit the program when finished, e.g. when Pinball FX2 doesn't receive any frames anymore.                                                                                                                                                               | false   |
 | `--quit-after`         | Exit after n milliseconds. If set to -1, waits indefinitely or until source finishes when -q used.                                                                                                                                                      | -1      |
 | `--no-clear`           | Don't clear screen when quitting.                                                                                                                                                                                                                       | false   |
@@ -855,6 +857,30 @@ setup, however note that games that you've already configured won't be affected.
 
 
 ## Build Instructions
+
+This project targets .NET Framework 4.7.2 and uses Windows-only dependencies
+such as WPF and native device libraries. Edit from WSL if you like, but build
+and test from Windows. For the least friction, keep the checkout under a Windows
+path such as `C:\src\dmd-extensions`; older Windows build tools can be unreliable
+when pointed at `\\wsl.localhost\...` paths.
+
+To install the minimal Windows build/test toolchain:
+
+```powershell
+.\scripts\windows\Install-BuildTools.ps1
+```
+
+Open a new Windows PowerShell session after installation, then run:
+
+```powershell
+.\scripts\windows\Test.ps1
+```
+
+To run only matching tests:
+
+```powershell
+.\scripts\windows\Test.ps1 -Filter "FullyQualifiedName~Rotate"
+```
 
 1. Download and install [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
 2. The unmanaged exports library needs MS Build tools, which come with .NET 3.5. [Install Instructions](https://docs.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows-10)

@@ -51,6 +51,7 @@ namespace DmdExt.Mirror
 				Resize = _config.Global.Resize,
 				FlipHorizontally = _config.Global.FlipHorizontally,
 				FlipVertically = _config.Global.FlipVertically,
+				Rotation = _config.Global.Rotation,
 				IdleAfter = _options.IdleAfter,
 				IdlePlay = _options.IdlePlay
 			};

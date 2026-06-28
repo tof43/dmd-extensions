@@ -694,7 +694,7 @@ namespace LibDmd.DmdDevice
 				return;
 			}
 
-			Logger.Info("Transformation options: Resize={0}, HFlip={1}, VFlip={2}", _config.Global.Resize, _config.Global.FlipHorizontally, _config.Global.FlipVertically);
+			Logger.Info("Transformation options: Resize={0}, HFlip={1}, VFlip={2}, Rotation={3}", _config.Global.Resize, _config.Global.FlipHorizontally, _config.Global.FlipVertically, _config.Global.Rotation);
 			var refs = new UndisposedReferences();
 
 			// connect colorizer
@@ -709,6 +709,7 @@ namespace LibDmd.DmdDevice
 						Resize = _config.Global.Resize,
 						FlipHorizontally = _config.Global.FlipHorizontally,
 						FlipVertically = _config.Global.FlipVertically,
+						Rotation = _config.Global.Rotation,
 						ScalerMode = _config.Global.ScalerMode
 					});
 					ReportingTags.Add("Color:Gray2");
@@ -723,6 +724,7 @@ namespace LibDmd.DmdDevice
 						Resize = _config.Global.Resize,
 						FlipHorizontally = _config.Global.FlipHorizontally,
 						FlipVertically = _config.Global.FlipVertically,
+						Rotation = _config.Global.Rotation,
 						ScalerMode = _config.Global.ScalerMode
 					});
 					ReportingTags.Add("Color:Gray4");
@@ -737,6 +739,7 @@ namespace LibDmd.DmdDevice
 						Resize = _config.Global.Resize,
 						FlipHorizontally = _config.Global.FlipHorizontally,
 						FlipVertically = _config.Global.FlipVertically,
+						Rotation = _config.Global.Rotation,
 						ScalerMode = _config.Global.ScalerMode,
 					});
 					ReportingTags.Add("Color:Alphanumeric");
@@ -753,6 +756,7 @@ namespace LibDmd.DmdDevice
 							Resize = _config.Global.Resize,
 							FlipHorizontally = _config.Global.FlipHorizontally,
 							FlipVertically = _config.Global.FlipVertically,
+							Rotation = _config.Global.Rotation,
 							ScalerMode = _config.Global.ScalerMode
 						});
 
@@ -763,6 +767,7 @@ namespace LibDmd.DmdDevice
 							Resize = _config.Global.Resize,
 							FlipHorizontally = _config.Global.FlipHorizontally,
 							FlipVertically = _config.Global.FlipVertically,
+							Rotation = _config.Global.Rotation,
 							ScalerMode = _config.Global.ScalerMode
 						});
 
@@ -773,6 +778,7 @@ namespace LibDmd.DmdDevice
 							Resize = _config.Global.Resize,
 							FlipHorizontally = _config.Global.FlipHorizontally,
 							FlipVertically = _config.Global.FlipVertically,
+							Rotation = _config.Global.Rotation,
 							ScalerMode = _config.Global.ScalerMode
 						});
 					}
@@ -799,6 +805,7 @@ namespace LibDmd.DmdDevice
 					Resize = _config.Global.Resize,
 					FlipHorizontally = _config.Global.FlipHorizontally,
 					FlipVertically = _config.Global.FlipVertically,
+					Rotation = _config.Global.Rotation,
 					ScalerMode = _config.Global.ScalerMode
 				});
 
@@ -809,6 +816,7 @@ namespace LibDmd.DmdDevice
 					Resize = _config.Global.Resize,
 					FlipHorizontally = _config.Global.FlipHorizontally,
 					FlipVertically = _config.Global.FlipVertically,
+					Rotation = _config.Global.Rotation,
 					ScalerMode = _config.Global.ScalerMode
 				});
 
@@ -819,6 +827,7 @@ namespace LibDmd.DmdDevice
 					Resize = _config.Global.Resize,
 					FlipHorizontally = _config.Global.FlipHorizontally,
 					FlipVertically = _config.Global.FlipVertically,
+					Rotation = _config.Global.Rotation,
 					ScalerMode = _config.Global.ScalerMode
 				});
 			}
@@ -831,6 +840,7 @@ namespace LibDmd.DmdDevice
 				Resize = _config.Global.Resize,
 				FlipHorizontally = _config.Global.FlipHorizontally,
 				FlipVertically = _config.Global.FlipVertically,
+				Rotation = _config.Global.Rotation,
 				ScalerMode = _config.Global.ScalerMode
 			});
 
@@ -842,6 +852,7 @@ namespace LibDmd.DmdDevice
 				Resize = _config.Global.Resize,
 				FlipHorizontally = _config.Global.FlipHorizontally,
 				FlipVertically = _config.Global.FlipVertically,
+				Rotation = _config.Global.Rotation,
 				ScalerMode = _config.Global.ScalerMode
 			});
 

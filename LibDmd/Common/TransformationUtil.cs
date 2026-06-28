@@ -12,7 +12,7 @@ namespace LibDmd.Common
 	public static class TransformationUtil
 	{
 		/// <summary>
-		/// Flips a top-left to bottom-right array of pixels with a given number of bytes per pixel.
+		/// Flips and rotates a top-left to bottom-right array of pixels with a given number of bytes per pixel.
 		/// </summary>
 		/// <param name="dim">Frame dimensions</param>
 		/// <param name="bytesPerPixel">How many bytes per pixel</param>
@@ -20,27 +20,30 @@ namespace LibDmd.Common
 		/// <param name="flipHorizontally">If true, flip horizontally (left/right)</param>
 		/// <param name="flipVertically">If true, flip vertically (top/down)</param>
 		/// <returns></returns>
-		public static byte[] Flip(Dimensions dim, int bytesPerPixel, byte[] frame, bool flipHorizontally, bool flipVertically)
+		public static byte[] Transform(Dimensions dim, int bytesPerPixel, byte[] frame, bool flipHorizontally, bool flipVertically, FrameRotation rotation)
 		{
-			using (Profiler.Start("TransformationUtil.Flip")) {
-				if (!flipHorizontally && !flipVertically) {
+			using (Profiler.Start("TransformationUtil.Transform")) {
+				if (!flipHorizontally && !flipVertically && rotation == FrameRotation.None) {
 					return frame;
 				}
 				var pos = 0;
-				var flipped = new byte[frame.Length];
-				for (var y = 0; y < dim.Height; y++) {
-					for (var x = 0; x < dim.Width * bytesPerPixel; x += bytesPerPixel) {
-						var xFlipped = flipHorizontally ? (dim.Width - 1) * bytesPerPixel - x : x;
-						var yFlipped = flipVertically ? dim.Height - y - 1 : y;
+				var transformed = new byte[frame.Length];
+				var targetDim = GetRotatedDimensions(dim, rotation);
+				for (var y = 0; y < targetDim.Height; y++) {
+					for (var x = 0; x < targetDim.Width; x++) {
+						GetSourceCoordinates(dim, targetDim, x, y, flipHorizontally, flipVertically, rotation, out var xSource, out var ySource);
 						for (var v = 0; v < bytesPerPixel; v++) {
-							flipped[pos + v] = frame[dim.Width * bytesPerPixel * yFlipped + xFlipped + v];
+							transformed[pos + v] = frame[(dim.Width * ySource + xSource) * bytesPerPixel + v];
 						}
 						pos += bytesPerPixel;
 					}
 				}
-				return flipped;
+				return transformed;
 			}
 		}
+
+		public static byte[] Flip(Dimensions dim, int bytesPerPixel, byte[] frame, bool flipHorizontally, bool flipVertically)
+			=> Transform(dim, bytesPerPixel, frame, flipHorizontally, flipVertically, FrameRotation.None);
 
 		/// <summary>
 		/// Flips a given number of bit planes.
@@ -78,7 +81,7 @@ namespace LibDmd.Common
 		}
 
 		/// <summary>
-		/// Resizes and flips an image
+		/// Resizes, flips and rotates an image
 		/// </summary>
 		/// <param name="bmp">Source image</param>
 		/// <param name="destDim">Resize to these dimensions</param>
@@ -86,16 +89,18 @@ namespace LibDmd.Common
 		/// <param name="flipHorizontally">If true, flip horizontally (left/right)</param>
 		/// <param name="flipVertically">If true, flip vertically (top/down)</param>
 		/// <returns>New transformed image or the same image if new dimensions are identical and no flipping taking place</returns>
-		public static BitmapSource Transform(BitmapSource bmp, Dimensions destDim, ResizeMode resize, bool flipHorizontally, bool flipVertically)
+		public static BitmapSource Transform(BitmapSource bmp, Dimensions destDim, ResizeMode resize, bool flipHorizontally, bool flipVertically, FrameRotation rotation)
 		{
-			using (Profiler.Start("TransformationUtil.Flip")) {
+			using (Profiler.Start("TransformationUtil.Transform")) {
 
-				if (bmp.Dimensions() == destDim && !flipHorizontally && !flipVertically) {
+				if (bmp.Dimensions() == destDim && !flipHorizontally && !flipVertically && rotation == FrameRotation.None) {
 					return bmp;
 				}
 
 				var sw = new Stopwatch();
 				sw.Start();
+
+				bmp = Rotate(bmp, rotation);
 
 				var srcAr = (double)bmp.PixelWidth / bmp.PixelHeight;
 				var destAr = destDim.AspectRatio;
@@ -251,6 +256,69 @@ namespace LibDmd.Common
 
 				processedBmp.Freeze();
 				return processedBmp;
+			}
+		}
+
+		public static BitmapSource Transform(BitmapSource bmp, Dimensions destDim, ResizeMode resize, bool flipHorizontally, bool flipVertically)
+			=> Transform(bmp, destDim, resize, flipHorizontally, flipVertically, FrameRotation.None);
+
+		public static Dimensions GetRotatedDimensions(Dimensions dim, FrameRotation rotation)
+		{
+			return rotation == FrameRotation.Cw || rotation == FrameRotation.Ccw
+				? new Dimensions(dim.Height, dim.Width)
+				: dim;
+		}
+
+		private static BitmapSource Rotate(BitmapSource bmp, FrameRotation rotation)
+		{
+			if (rotation == FrameRotation.None) {
+				return bmp;
+			}
+
+			var angle = 0;
+			switch (rotation) {
+				case FrameRotation.Cw:
+					angle = 90;
+					break;
+				case FrameRotation.Ccw:
+					angle = 270;
+					break;
+				case FrameRotation.Rotate180:
+					angle = 180;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(rotation), rotation, null);
+			}
+
+			var rotated = new TransformedBitmap(bmp, new RotateTransform(angle));
+			rotated.Freeze();
+			return rotated;
+		}
+
+		private static void GetSourceCoordinates(Dimensions sourceDim, Dimensions targetDim, int x, int y, bool flipHorizontally, bool flipVertically, FrameRotation rotation, out int xSource, out int ySource)
+		{
+			var xTransformed = flipHorizontally ? targetDim.Width - x - 1 : x;
+			var yTransformed = flipVertically ? targetDim.Height - y - 1 : y;
+
+			switch (rotation) {
+				case FrameRotation.None:
+					xSource = xTransformed;
+					ySource = yTransformed;
+					return;
+				case FrameRotation.Cw:
+					xSource = yTransformed;
+					ySource = sourceDim.Height - xTransformed - 1;
+					return;
+				case FrameRotation.Ccw:
+					xSource = sourceDim.Width - yTransformed - 1;
+					ySource = xTransformed;
+					return;
+				case FrameRotation.Rotate180:
+					xSource = sourceDim.Width - xTransformed - 1;
+					ySource = sourceDim.Height - yTransformed - 1;
+					return;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(rotation), rotation, null);
 			}
 		}
 	}

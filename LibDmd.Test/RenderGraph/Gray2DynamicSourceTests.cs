@@ -127,6 +127,64 @@ namespace LibDmd.Test
 		}
 
 		[TestCase]
+		public async Task Should_Rotate_Clockwise()
+		{
+			var dest = new DestinationDynamicGray2();
+
+			_graph.Source = _source;
+			_graph.Rotation = FrameRotation.Cw;
+			_graph.Destinations = new List<IDestination> { dest };
+			_graph.StartRendering();
+
+			var frame = FrameGenerator.FromString(@"
+				33333333
+				02020202
+				10101010
+				00000000");
+
+			var frameRotated = FrameGenerator.FromString(@"
+				0103
+				0023
+				0103
+				0023
+				0103
+				0023
+				0103
+				0023");
+
+			await AssertFrame(_source, dest, frame, frameRotated);
+		}
+
+		[TestCase]
+		public async Task Should_Rotate_CounterClockwise()
+		{
+			var dest = new DestinationDynamicGray2();
+
+			_graph.Source = _source;
+			_graph.Rotation = FrameRotation.Ccw;
+			_graph.Destinations = new List<IDestination> { dest };
+			_graph.StartRendering();
+
+			var frame = FrameGenerator.FromString(@"
+				33333333
+				02020202
+				10101010
+				00000000");
+
+			var frameRotated = FrameGenerator.FromString(@"
+				3200
+				3010
+				3200
+				3010
+				3200
+				3010
+				3200
+				3010");
+
+			await AssertFrame(_source, dest, frame, frameRotated);
+		}
+
+		[TestCase]
 		public async Task Should_Upscale_With_HDScaling_Double()
 		{
 			var dest = new DestinationDynamicGray2();

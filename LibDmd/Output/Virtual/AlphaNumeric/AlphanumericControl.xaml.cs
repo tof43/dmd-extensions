@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using LibDmd.Common;
@@ -15,7 +16,7 @@ namespace LibDmd.Output.Virtual.AlphaNumeric
 	/// <summary>
 	/// Interaction logic for AlphanumericControl.xaml
 	/// </summary>
-	public partial class AlphanumericControl : IVirtualControl
+	public partial class AlphanumericControl : UserControl, IVirtualControl
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

@@ -86,6 +86,9 @@ namespace DmdExt.Common
 		[Option("flip-y", HelpText = "Flips the image vertically (top/down). Default: false.")]
 		public bool FlipVertically { get; set; } = false;
 
+		[Option("rotate", HelpText = "Rotates the image before resizing. One of: [ none, cw, ccw, rotate180 ]. Default: \"none\".")]
+		public FrameRotation Rotation { get; set; } = FrameRotation.None;
+
 		[Option('p', "port", HelpText = "Force COM port for PinDMDv3 devices. Example: \"COM3\".")]
 		public string Port { get; set; } = null;
 
@@ -245,6 +248,7 @@ namespace DmdExt.Common
 		public ResizeMode Resize => _options.Resize;
 		public bool FlipHorizontally => _options.FlipHorizontally;
 		public bool FlipVertically => _options.FlipVertically;
+		public FrameRotation Rotation => _options.Rotation;
 		public bool Colorize => _options.Colorize;
 		public bool QuitWhenDone
 		{

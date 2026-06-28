@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using LibDmd.Common;
 using LibDmd.Frame;
@@ -29,7 +30,7 @@ namespace LibDmd.Output.Virtual.Dmd
 	/// <summary>
 	/// Interaction logic for VirtualDmdControl.xaml
 	/// </summary>
-	public partial class VirtualDmdControl : IGray2Destination, IGray4Destination, IGray8Destination, IColoredGray2Destination, IColoredGray4Destination,
+	public partial class VirtualDmdControl : UserControl, IGray2Destination, IGray4Destination, IGray8Destination, IColoredGray2Destination, IColoredGray4Destination,
 		IColoredGray6Destination, IBitmapDestination, IRgb565Destination, IPaletteDestination, IResizableDestination, IVirtualControl, IColorRotationDestination
 	// these others are for debugging purpose. basically you can make the virtual dmd
 	// behave like any other display by adding/removing interfaces

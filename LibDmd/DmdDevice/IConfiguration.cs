@@ -40,6 +40,7 @@ namespace LibDmd.DmdDevice
 		ResizeMode Resize { get; }
 		bool FlipHorizontally { get; }
 		bool FlipVertically { get; }
+		FrameRotation Rotation { get; }
 		bool Colorize { get; }
 		bool QuitWhenDone { get; set; }
 		int QuitAfter { get; set; }

@@ -51,7 +51,8 @@ namespace DmdExt.Test
 					Destinations = renderers,
 					Resize = _config.Global.Resize,
 					FlipHorizontally = _config.Global.FlipHorizontally,
-					FlipVertically = _config.Global.FlipVertically
+					FlipVertically = _config.Global.FlipVertically,
+					Rotation = _config.Global.Rotation
 				};
 
 			} else {
@@ -88,7 +89,8 @@ namespace DmdExt.Test
 					Destinations = renderers,
 					Resize = _config.Global.Resize,
 					FlipHorizontally = _config.Global.FlipHorizontally,
-					FlipVertically = _config.Global.FlipVertically
+					FlipVertically = _config.Global.FlipVertically,
+					Rotation = _config.Global.Rotation
 				};
 			}
 

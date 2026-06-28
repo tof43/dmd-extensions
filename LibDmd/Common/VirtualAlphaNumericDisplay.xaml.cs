@@ -6,7 +6,7 @@ using LibDmd.Output.Virtual.AlphaNumeric;
 
 namespace LibDmd.Common
 {
-	public partial class VirtualAlphaNumericDisplay
+	public partial class VirtualAlphaNumericDisplay : VirtualDisplay
 	{
 		public override IVirtualControl VirtualControl => AlphaNumericDisplay;
 

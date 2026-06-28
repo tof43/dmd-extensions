@@ -200,6 +200,17 @@ namespace LibDmd.DmdDevice
 		public ResizeMode Resize => GetEnum("resize", ResizeMode.Fit);
 		public bool FlipHorizontally => GetBoolean("fliphorizontally", false);
 		public bool FlipVertically => GetBoolean("flipvertically", false);
+		public FrameRotation Rotation {
+			get {
+				if (GetBoolean("rol", false)) {
+					return FrameRotation.Ccw;
+				}
+				if (GetBoolean("ror", false)) {
+					return FrameRotation.Cw;
+				}
+				return ParseRotation(GetString("rotate", "none"));
+			}
+		}
 #if DISABLE_COLORING
 		public bool Colorize { get; } = false;
 #else
@@ -256,6 +267,35 @@ namespace LibDmd.DmdDevice
 
 		public GlobalConfig(IniData data, Configuration parent) : base(data, parent)
 		{
+		}
+
+		private static FrameRotation ParseRotation(string rotation)
+		{
+			if (string.IsNullOrWhiteSpace(rotation)) {
+				return FrameRotation.None;
+			}
+			switch (rotation.Trim().ToLowerInvariant()) {
+				case "none":
+				case "0":
+				case "false":
+					return FrameRotation.None;
+				case "cw":
+				case "clockwise":
+				case "right":
+				case "ror":
+					return FrameRotation.Cw;
+				case "ccw":
+				case "counterclockwise":
+				case "counter-clockwise":
+				case "left":
+				case "rol":
+					return FrameRotation.Ccw;
+				case "180":
+				case "rotate180":
+					return FrameRotation.Rotate180;
+				default:
+					return FrameRotation.None;
+			}
 		}
 	}
 

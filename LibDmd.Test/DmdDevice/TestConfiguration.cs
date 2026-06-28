@@ -53,6 +53,7 @@ namespace LibDmd.Test
 		public ResizeMode Resize { get; set; }
 		public bool FlipHorizontally { get; set; }
 		public bool FlipVertically { get; set; }
+		public FrameRotation Rotation { get; set; }
 		public bool Colorize { get; set; }
 		public bool QuitWhenDone { get; set; }
 		public int QuitAfter { get; set; }

@@ -76,15 +76,19 @@ namespace LibDmd.Frame
 		{
 			var targetDim = GetTargetDimensions(fixedDest, multiDest);
 			var mustResize = targetDim != Dimensions.Dynamic && Dimensions != targetDim;
-			if (!mustResize && !renderGraph.FlipHorizontally && !renderGraph.FlipVertically) {
+			if (!mustResize && !renderGraph.HasTransformation) {
 				return this;
 			}
-			return Transform(targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+			return Transform(targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
 		}
 
-		private BmpFrame Transform(Dimensions dim, ResizeMode resize, bool flipHorizontally, bool flipVertically)
+		private BmpFrame Transform(Dimensions dim, ResizeMode resize, bool flipHorizontally, bool flipVertically, FrameRotation rotation)
 		{
-			Bitmap = TransformationUtil.Transform(Bitmap, dim, resize, flipHorizontally, flipVertically);
+			if (dim == Dimensions.Dynamic) {
+				dim = TransformationUtil.GetRotatedDimensions(Dimensions, rotation);
+			}
+			Bitmap = TransformationUtil.Transform(Bitmap, dim, resize, flipHorizontally, flipVertically, rotation);
+			Dimensions = Bitmap.Dimensions();
 			return this;
 		}
 

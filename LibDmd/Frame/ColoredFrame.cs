@@ -195,19 +195,25 @@ namespace LibDmd
 		{
 			var targetDim = GetTargetDimensions(fixedDest, multiDest);
 
-			// for dynamic or equal target dimensions, just flip
-			if (targetDim == Dimensions.Dynamic || targetDim == Dimensions) {
-				return Update(TransformationUtil.Flip(Dimensions, BytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically));
+			if (targetDim == Dimensions.Dynamic) {
+				var transformedDim = TransformationUtil.GetRotatedDimensions(Dimensions, renderGraph.Rotation);
+				var dynamicData = TransformationUtil.Transform(Dimensions, BytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
+				Update(transformedDim, dynamicData);
+				return this;
+			}
+
+			if (targetDim == Dimensions && renderGraph.Rotation == FrameRotation.None) {
+				return Update(TransformationUtil.Transform(Dimensions, BytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, FrameRotation.None));
 			}
 
 			// // if we need to scale down by factor 2, do it here more efficiently
-			// if (Dimensions.IsDoubleSizeOf(targetDim) && !renderGraph.FlipHorizontally && !renderGraph.FlipVertically) {
+			// if (Dimensions.IsDoubleSizeOf(targetDim) && !renderGraph.HasTransformation) {
 			// 	return Update(targetDim, FrameUtil.ScaleDown(targetDim, Data));
 			// }
 
 			// otherwise, convert to grayscale bitmap, transform, convert back.
 			var bmp = ConvertToBitmapWithoutColors();
-			var transformedBmp = TransformationUtil.Transform(bmp, targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+			var transformedBmp = TransformationUtil.Transform(bmp, targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
 			var transformedData = ConvertFromBitmapWithoutColors(transformedBmp);
 
 			Update(targetDim, transformedData);

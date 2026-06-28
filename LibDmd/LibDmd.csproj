@@ -487,6 +487,7 @@
     <Compile Include="DmdDevice\AlphaNumeric.cs" />
     <Compile Include="Common\ColorUtil.cs" />
     <Compile Include="Common\FrameUtil.cs" />
+    <Compile Include="Common\FrameRotation.cs" />
     <Compile Include="Common\HeatShrink\HeatShrinkDecoder.cs" />
     <Compile Include="Common\HeatShrink\HeatShrinkEncoder.cs" />
     <Compile Include="Common\HeatShrink\OutputInfo.cs" />
@@ -530,7 +531,7 @@
     <Compile Include="Input\Passthrough\PassthroughGray4Source.cs" />
     <Compile Include="Input\Passthrough\PassthroughGray2Source.cs" />
     <Compile Include="Input\FileSystem\PassthroughSource.cs" />
-    <Compile Include="Input\ProPinball\ProPinballSlave.cs" />
+    <Compile Include="Input\ProPinball\ProPinballSlave.cs" Condition="'$(SkipNativeProjectReferences)' != 'true'" />
     <Compile Include="Output\FileOutput\GifOutput.cs" />
     <Compile Include="Output\IAlphaNumericDestination.cs" />
     <Compile Include="Output\PinUp\PinUpOutput.cs" />
@@ -801,7 +802,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProPinballBridge\ProPinballBridge.vcxproj">
+    <ProjectReference Include="..\ProPinballBridge\ProPinballBridge.vcxproj" Condition="'$(SkipNativeProjectReferences)' != 'true'">
       <Project>{668cdaaf-49e4-4b01-bd9d-37d5ae89ddac}</Project>
       <Name>ProPinballBridge</Name>
       <Private>True</Private>

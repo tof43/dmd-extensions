@@ -452,14 +452,18 @@ namespace LibDmd.Frame
 
 				var bytesPerPixel = BytesPerPixel;
 				var targetDim = GetTargetDimensions(fixedDest, multiDest);
-				if (targetDim == Dimensions.Dynamic || Dimensions == targetDim) {
-					// just flip
-					Data = TransformationUtil.Flip(Dimensions, bytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				if (targetDim == Dimensions.Dynamic) {
+					var transformedDim = TransformationUtil.GetRotatedDimensions(Dimensions, renderGraph.Rotation);
+					return Update(transformedDim, TransformationUtil.Transform(Dimensions, bytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation), BitLength);
+				}
+
+				if (Dimensions == targetDim && renderGraph.Rotation == FrameRotation.None) {
+					Data = TransformationUtil.Transform(Dimensions, bytesPerPixel, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, FrameRotation.None);
 					return this;
 				}
 
 				// perf: if no flipping these cases can easily done on the byte array directly
-				if (!renderGraph.FlipHorizontally && !renderGraph.FlipVertically) {
+				if (!renderGraph.HasTransformation) {
 
 					// copy whole block if only vertical padding
 					if (Dimensions.Width == targetDim.Width && Dimensions.Height < targetDim.Height) {
@@ -474,7 +478,7 @@ namespace LibDmd.Frame
 
 				// otherwise, convert to bitmap, resize, convert back.
 				var bmp = ImageUtil.ConvertFrom(BitLength, Dimensions, Data, 0, 1, 1);
-				var transformedBmp = TransformationUtil.Transform(bmp, targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				var transformedBmp = TransformationUtil.Transform(bmp, targetDim, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
 				var transformedFrame = ImageUtil.ConvertTo(BitLength, transformedBmp);
 
 				return Update(targetDim, transformedFrame, BitLength);
@@ -487,19 +491,22 @@ namespace LibDmd.Frame
 
 				// todo merge with TransformGray
 				// do anything at all?
-				if (fixedDest == null && !renderGraph.FlipHorizontally && !renderGraph.FlipVertically) {
+				if (fixedDest == null && !renderGraph.HasTransformation) {
 					return this;
 				}
 
-				// just flip?
-				if (fixedDest == null || fixedDest.FixedSize == Dimensions) {
-					Data = TransformationUtil.Flip(Dimensions, 3, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				if (fixedDest == null) {
+					return Update(TransformationUtil.GetRotatedDimensions(Dimensions, renderGraph.Rotation), TransformationUtil.Transform(Dimensions, 3, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation), 24);
+				}
+
+				if (fixedDest.FixedSize == Dimensions && renderGraph.Rotation == FrameRotation.None) {
+					Data = TransformationUtil.Transform(Dimensions, 3, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, FrameRotation.None);
 					return this;
 				}
 
 				// resize
 				var bmp = ImageUtil.ConvertFromRgb24(Dimensions, Data);
-				var transformedBmp = TransformationUtil.Transform(bmp, fixedDest.FixedSize, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				var transformedBmp = TransformationUtil.Transform(bmp, fixedDest.FixedSize, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
 				var transformedFrame = ImageUtil.ConvertToRgb24(transformedBmp);
 				return new DmdFrame(fixedDest.FixedSize, transformedFrame, 24);
 			}
@@ -510,19 +517,22 @@ namespace LibDmd.Frame
 			using (Profiler.Start("DmdFrame.TransformRgb24")) {
 
 				// do anything at all?
-				if (fixedDest == null && !renderGraph.FlipHorizontally && !renderGraph.FlipVertically) {
+				if (fixedDest == null && !renderGraph.HasTransformation) {
 					return this;
 				}
 
-				// just flip?
-				if (fixedDest == null || fixedDest.FixedSize == Dimensions) {
-					Data = TransformationUtil.Flip(Dimensions, 2, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				if (fixedDest == null) {
+					return Update(TransformationUtil.GetRotatedDimensions(Dimensions, renderGraph.Rotation), TransformationUtil.Transform(Dimensions, 2, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation), 16);
+				}
+
+				if (fixedDest.FixedSize == Dimensions && renderGraph.Rotation == FrameRotation.None) {
+					Data = TransformationUtil.Transform(Dimensions, 2, Data, renderGraph.FlipHorizontally, renderGraph.FlipVertically, FrameRotation.None);
 					return this;
 				}
 
 				// resize
 				var bmp = ImageUtil.ConvertFromRgb565(Dimensions, Data);
-				var transformedBmp = TransformationUtil.Transform(bmp, fixedDest.FixedSize, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically);
+				var transformedBmp = TransformationUtil.Transform(bmp, fixedDest.FixedSize, renderGraph.Resize, renderGraph.FlipHorizontally, renderGraph.FlipVertically, renderGraph.Rotation);
 				var transformedFrame = ImageUtil.ConvertToRgb565(transformedBmp);
 				return new DmdFrame(fixedDest.FixedSize, transformedFrame, 16);
 			}

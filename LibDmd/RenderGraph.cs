@@ -91,6 +91,13 @@ namespace LibDmd
 		public bool FlipHorizontally { get; set; }
 
 		/// <summary>
+		/// Rotates the image before resizing.
+		/// </summary>
+		public FrameRotation Rotation { get; set; } = FrameRotation.None;
+
+		public bool HasTransformation => FlipHorizontally || FlipVertically || Rotation != FrameRotation.None;
+
+		/// <summary>
 		/// How the image is resized for destinations with fixed width.
 		/// </summary>
 		public ResizeMode Resize { get; set; } = ResizeMode.Stretch;
@@ -1706,7 +1713,8 @@ namespace LibDmd
 					Destinations = Destinations,
 					Resize = Resize,
 					FlipHorizontally = FlipHorizontally,
-					FlipVertically = FlipVertically
+					FlipVertically = FlipVertically,
+					Rotation = Rotation
 				};
 				_idleRenderer = _idleRenderGraph.StartRendering();
 

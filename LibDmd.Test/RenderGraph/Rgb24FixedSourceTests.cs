@@ -191,6 +191,38 @@ namespace LibDmd.Test
 		}
 
 		[TestCase]
+		public async Task Should_Rotate_Clockwise()
+		{
+			var dest = new DestinationDynamicRgb24();
+
+			_graph.Source = _source;
+			_graph.Rotation = FrameRotation.Cw;
+			_graph.Destinations = new List<IDestination> { dest };
+			_graph.StartRendering();
+
+			var rgbFrame = FrameGenerator.FromString(@"
+				01 02 03
+				04 05 06", @"
+				11 12 13
+				14 15 16", @"
+				21 22 23
+				24 25 26");
+
+			var rotatedFrame = FrameGenerator.FromString(@"
+				04 01
+				05 02
+				06 03", @"
+				14 11
+				15 12
+				16 13", @"
+				24 21
+				25 22
+				26 23");
+
+			await AssertFrame(_source, dest, rgbFrame, rotatedFrame);
+		}
+
+		[TestCase]
 		public async Task Should_Upscale_With_Centering_Graph_NoHdScaling()
 		{
 			var dest = new DestinationFixedRgb24(10, 6) { DmdAllowHdScaling = true };
