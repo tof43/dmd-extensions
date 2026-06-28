@@ -135,7 +135,7 @@ upscale frames to the virtual DMD. In order to do that, set `scalermode` so to e
 
 ## Install Instructions
 
-[Download the installer](https://github.com/freezy/dmd-extensions/releases) and
+[Download the installer](https://github.com/tof43/dmd-extensions/releases/latest) and
 run it. A few notes:
 
 - The installer will overwrite any existing `dmddevice.dll` in your VPM folder
@@ -767,7 +767,7 @@ or preferably [here](https://github.com/freezy/dmd-extensions/issues).
 
 ## Manual Installation
 
-1. [Download the .zip archive](https://github.com/freezy/dmd-extensions/releases),
+1. [Download the .zip archive](https://github.com/tof43/dmd-extensions/releases/latest),
    copy its content to your hard drive, preferably in your `PATH`,
    and unblock the `.exe` file (right-click, properties, unblock).
 2. Download and install the [Visual C++ Redistributables for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
@@ -867,25 +867,25 @@ when pointed at `\\wsl.localhost\...` paths.
 To install the minimal Windows build/test toolchain:
 
 ```powershell
-.\scripts\windows\Install-BuildTools.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\Install-BuildTools.ps1
 ```
 
 Open a new Windows PowerShell session after installation, then run:
 
 ```powershell
-.\scripts\windows\Test.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\Test.ps1
 ```
 
 To run only matching tests:
 
 ```powershell
-.\scripts\windows\Test.ps1 -Filter "FullyQualifiedName~Rotate"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\Test.ps1 -Filter "FullyQualifiedName~Rotate"
 ```
 
 1. Download and install [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
 2. The unmanaged exports library needs MS Build tools, which come with .NET 3.5. [Install Instructions](https://docs.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows-10)
 3. *Recommended:* If you want `DmdDevice.dll` automatically copied to your VPM folder after build, point the `VPM_HOME` environment variable to your VPM installation folder.
-4. Clone the repo: `git clone https://github.com/freezy/dmd-extensions.git`
+4. Clone the repo: `git clone https://github.com/tof43/dmd-extensions.git`
 5. After cloning the repo, you'll need to restore the [DllExport](https://github.com/3F/DllExport)
    dependency. There is a script that does it for you. Go into the cloned repo and run:
    ```cmd
@@ -895,6 +895,10 @@ To run only matching tests:
 
 If you want to build the installer, you'll need the [WiX Toolset v3](https://wixtoolset.org/docs/wix3/)
 and its [Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=WixToolset.WixToolsetVisualStudio2022Extension).
+
+Releases are published by GitHub Actions when a tag named `v*` is pushed. The
+release assets follow the original project format: x86 and x64 MSI installers,
+plus x86 and x64 portable ZIP archives.
 
 Then there is an issue with Fody third party addin that may give you an error
 ith the $(IntermediateOutputPath). If this occurs, simply close Visual Studio

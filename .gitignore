@@ -225,6 +225,7 @@ Release - *
 videos/*
 *.exe
 *.ps1
+!scripts/windows/*.ps1
 *.psd
 *.ai
 rudder-sdk-.net/

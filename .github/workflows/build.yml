@@ -1,6 +1,8 @@
 name: Build and Package
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -9,8 +11,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     permissions:
-      packages: write
+      actions: read
       contents: read
+      packages: write
     strategy:
       matrix:
         platform: [x86, x64]
@@ -99,7 +102,7 @@ jobs:
           }
           
           function replaceFullVersion($name, $fileContent) {
-            $RegularExpression = [regex] "[^/]*\[assembly:\s*$name\(\""(\d)\.(\d)\.(\d)(-([\w\W]+))?\""\)"
+            $RegularExpression = [regex] "[^/]*\[assembly:\s*$name\(\""(\d+)\.(\d+)\.(\d+)(-([\w\W]+))?\""\)"
             foreach($content in $fileContent) {
               $match = [System.Text.RegularExpressions.Regex]::Match($content, $RegularExpression)
               if ($match.Success) {
@@ -108,12 +111,17 @@ jobs:
                 $patch=$match.groups[3].value -as [int]
                 $tag=$match.groups[5].value
           
-                $branch = if ($env:GITHUB_HEAD_REF) { $env:GITHUB_HEAD_REF } else { $env:GITHUB_REF_NAME }
-                if ($branch -eq "master" -or $branch -eq "main") {
-                  if ($tag) { $version = "$major.$minor.$patch-$tag-r$env:BRANCH_BUILD" }
-                  else { $version = "$major.$minor.$patch-r$env:BRANCH_BUILD" }
+                if ($env:GITHUB_REF.StartsWith("refs/tags/")) {
+                  $version = $env:GITHUB_REF_NAME
+                  if ($version.StartsWith("v")) { $version = $version.Substring(1) }
                 } else {
-                  $version = "$major.$minor.$patch-$($branch.ToUpper())-r$env:BRANCH_BUILD"
+                  $branch = if ($env:GITHUB_HEAD_REF) { $env:GITHUB_HEAD_REF } else { $env:GITHUB_REF_NAME }
+                  if ($branch -eq "master" -or $branch -eq "main") {
+                    if ($tag) { $version = "$major.$minor.$patch-$tag-r$env:BRANCH_BUILD" }
+                    else { $version = "$major.$minor.$patch-r$env:BRANCH_BUILD" }
+                  } else {
+                    $version = "$major.$minor.$patch-$($branch.ToUpper())-r$env:BRANCH_BUILD"
+                  }
                 }
           
                 "version=$version" >> $env:GITHUB_OUTPUT
@@ -203,7 +211,7 @@ jobs:
           Copy-Item $msi.FullName $target -Force
           if ($msi.FullName -ne $target) { Remove-Item $msi.FullName -Force }
 
-      - name: Upload portable bundle (single zip by GitHub)
+      - name: Upload portable bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: dmdext-v${{ steps.set_version.outputs.version }}-${{ matrix.platform }}
@@ -218,3 +226,53 @@ jobs:
           path: ${{ github.workspace }}\Installer\Builds\dmdext-v${{ steps.set_version.outputs.version }}-${{ matrix.platform }}.msi
           retention-days: 90
           if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    runs-on: windows-latest
+    needs: build-windows
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $releaseDir = Join-Path $env:GITHUB_WORKSPACE 'release-assets'
+          New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+
+          Get-ChildItem -Path artifacts -Directory | ForEach-Object {
+            if ($_.Name -like '*-msi') {
+              $msi = Get-ChildItem -Path $_.FullName -Filter *.msi -File -Recurse | Select-Object -First 1
+              if (-not $msi) { throw "No MSI found in artifact '$($_.Name)'." }
+              Copy-Item -Path $msi.FullName -Destination $releaseDir -Force
+            } else {
+              $zip = Join-Path $releaseDir "$($_.Name).zip"
+              Compress-Archive -Path (Join-Path $_.FullName '*') -DestinationPath $zip -Force
+            }
+          }
+
+          $assets = Get-ChildItem -Path $releaseDir -File
+          if ($assets.Count -ne 4) {
+            throw "Expected 4 release assets, found $($assets.Count): $($assets.Name -join ', ')"
+          }
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          name: ${{ github.ref_name }}
+          body: |
+            Windows builds for ${{ github.ref_name }}.
+
+            Assets match the original dmd-extensions release format:
+            - x86 and x64 MSI installers
+            - x86 and x64 portable ZIP archives
+          prerelease: ${{ contains(github.ref_name, '-') }}
